@@ -1,11 +1,12 @@
 # ? Realiza el build y push de la iamgen utilizando el dockerfile.prod
 steps:
-  - name: 'gcr.io/cloud-builders/docker'
+  - name: "gcr.io/cloud-builders/docker"
     args: 
       [
         "build",
         "-t",
         "northamerica-south1-docker.pkg.dev/store-microservices-459102/image-registry/auth-microservice",
+        "-f",
         "dockerfile.prod",
         "--platform=linux/amd64",
         "."
