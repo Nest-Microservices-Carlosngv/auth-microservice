@@ -16,3 +16,5 @@ steps:
         "push",
         "northamerica-south1-docker.pkg.dev/store-microservices-459102/image-registry/auth-microservice",
       ]
+options:
+  default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
