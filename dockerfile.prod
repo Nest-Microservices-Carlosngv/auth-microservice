@@ -1,0 +1,44 @@
+
+# ! Dependencies Stage
+FROM node:21-alpine AS deps
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+
+# ! Builder Stage
+FROM node:21-alpine AS builder
+
+WORKDIR /usr/src/app
+
+# ? Copiar dependencias sin necesidad de descargarlas
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+# ? Copiar todo el código fuente
+COPY . .
+
+# ? Opcional: npm run test
+RUN npm run build
+# ? Solo dependencias de producción
+RUN npm cache clean --force
+
+RUN npx prisma generate
+
+# ! Creation Stage
+FROM node:21-alpine AS prod
+
+WORKDIR /usr/src/app
+
+# ? Copiamos únicamente dependencias y app construida
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/prisma ./prisma
+COPY --from=builder /usr/src/app/generated ./generated
+COPY --from=builder /usr/src/app/dist ./dist
+
+ENV NODE_ENV=production
+
+USER node
+
+EXPOSE 3004
+
+CMD ["node", "dist/main.js"]
